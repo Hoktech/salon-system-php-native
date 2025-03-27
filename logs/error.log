@@ -172,3 +172,63 @@ Stack trace:
 #0 C:\xampp\htdocs\New folder (4)\api\products\read.php(11): require_once()
 #1 {main}
   thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:13 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:13 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:29 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:29 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:30 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:30 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\invoices\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:30 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:30 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:30 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:47:30 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\products\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:53:34 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:53:34 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:53:45 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:53:45 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\create.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:54:04 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 20:54:04 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\create.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 21:09:46 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 21:09:46 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 21:09:57 Asia/Riyadh] PHP Warning:  require_once(C:\xampp\htdocs\New folder (4)/api/config/Response.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166
+[27-Mar-2025 21:09:57 Asia/Riyadh] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\New folder (4)/api/config/Response.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\New folder (4)\api\config\config.php:166
+Stack trace:
+#0 C:\xampp\htdocs\New folder (4)\api\customers\read.php(11): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\New folder (4)\api\config\config.php on line 166

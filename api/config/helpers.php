@@ -38,56 +38,35 @@ function checkUserPermission($allowedRoles = []) {
     
     // التحقق من تسجيل دخول المستخدم
     if (!isset($_SESSION['user_id'])) {
-        throw new Exception("يجب تسجيل الدخول أولاً");
+        header('HTTP/1.1 401 Unauthorized');
+        echo json_encode([
+            'status' => false,
+            'message' => 'يجب تسجيل الدخول أولاً',
+            'data' => null
+        ]);
+        exit;
     }
     
     // التحقق من الأدوار المسموح لها
     if (!empty($allowedRoles) && !in_array($_SESSION['role'], $allowedRoles)) {
-        throw new Exception("ليس لديك صلاحية للوصول إلى هذه الصفحة");
+        header('HTTP/1.1 403 Forbidden');
+        echo json_encode([
+            'status' => false,
+            'message' => 'ليس لديك صلاحية للوصول إلى هذه الصفحة',
+            'data' => null
+        ]);
+        exit;
     }
     
     // إرجاع بيانات المستخدم
     return [
         'id' => $_SESSION['user_id'],
-        'username' => $_SESSION['username'],
-        'name' => $_SESSION['name'],
+        'username' => $_SESSION['username'] ?? '',
+        'name' => $_SESSION['full_name'] ?? '',
         'role' => $_SESSION['role'],
-        'branch_id' => $_SESSION['branch_id'],
+        'branch_id' => $_SESSION['branch_id'] ?? null,
         'permissions' => $_SESSION['permissions'] ?? []
     ];
-}
-
-/**
- * التحقق من الصلاحية المحددة للمستخدم
- * 
- * @param string $permission الصلاحية المطلوبة
- * @return bool نتيجة التحقق
- * @throws Exception في حالة عدم وجود صلاحية
- */
-function checkPermission($permission) {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    
-    // التحقق من تسجيل دخول المستخدم
-    if (!isset($_SESSION['user_id'])) {
-        throw new Exception("يجب تسجيل الدخول أولاً");
-    }
-    
-    // الصلاحيات للمستخدم الحالي
-    $userPermissions = $_SESSION['permissions'] ?? [];
-    
-    // إذا كان المستخدم مدير (admin) فلديه جميع الصلاحيات
-    if ($_SESSION['role'] === 'admin') {
-        return true;
-    }
-    
-    // التحقق من وجود الصلاحية المطلوبة
-    if (!in_array($permission, $userPermissions)) {
-        throw new Exception("ليس لديك صلاحية للقيام بهذه العملية");
-    }
-    
-    return true;
 }
 
 /**
@@ -212,58 +191,6 @@ function exportToCSV($data, $filename = 'export.csv', $headers = []) {
 }
 
 /**
- * إرسال بريد إلكتروني باستخدام PHPMailer إذا كان متاحاً
- * 
- * @param string $to عنوان البريد الإلكتروني للمستلم
- * @param string $subject موضوع الرسالة
- * @param string $body محتوى الرسالة
- * @param array $attachments مرفقات الرسالة
- * @return bool نتيجة إرسال البريد
- */
-function sendEmail($to, $subject, $body, $attachments = []) {
-    // التحقق من وجود إعدادات SMTP في ملف الإعدادات
-    if (!defined('SMTP_HOST') || !defined('SMTP_USERNAME') || !defined('SMTP_PASSWORD')) {
-        return false;
-    }
-    
-    // التحقق من وجود مكتبة PHPMailer
-    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return false;
-    }
-    
-    try {
-        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host = SMTP_HOST;
-        $mail->SMTPAuth = true;
-        $mail->Username = SMTP_USERNAME;
-        $mail->Password = SMTP_PASSWORD;
-        $mail->SMTPSecure = defined('SMTP_SECURE') ? SMTP_SECURE : 'tls';
-        $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 587;
-        $mail->CharSet = 'UTF-8';
-        
-        $mail->setFrom(SMTP_USERNAME, defined('COMPANY_NAME') ? COMPANY_NAME : 'نظام إدارة الصالونات');
-        $mail->addAddress($to);
-        $mail->Subject = $subject;
-        $mail->isHTML(true);
-        $mail->Body = $body;
-        
-        // إضافة المرفقات
-        if (!empty($attachments)) {
-            foreach ($attachments as $attachment) {
-                if (file_exists($attachment)) {
-                    $mail->addAttachment($attachment);
-                }
-            }
-        }
-        
-        return $mail->send();
-    } catch (Exception $e) {
-        return false;
-    }
-}
-
-/**
  * تسجيل نشاط في سجل النظام
  * 
  * @param int $userId معرف المستخدم
@@ -347,55 +274,6 @@ function isTimeSlotAvailable($employeeId, $date, $startTime, $endTime, $appointm
 }
 
 /**
- * التحقق من كمية المنتج المتوفرة في المخزون
- * 
- * @param int $productId معرف المنتج
- * @param int $quantity الكمية المطلوبة
- * @param int $branchId معرف الفرع (اختياري)
- * @return bool نتيجة التحقق
- */
-function isProductAvailable($productId, $quantity, $branchId = 0) {
-    try {
-        global $db;
-        if (!isset($db) || !$db) {
-            $database = new Database();
-            $db = $database->getConnection();
-        }
-        
-        $query = "SELECT id, quantity FROM products WHERE id = :id";
-        
-        // إضافة شرط الفرع إذا كان محدداً
-        if ($branchId > 0) {
-            $query = "
-                SELECT p.id, i.quantity 
-                FROM products p
-                JOIN inventory i ON p.id = i.product_id
-                WHERE p.id = :id AND i.branch_id = :branch_id
-            ";
-        }
-        
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(":id", $productId);
-        
-        if ($branchId > 0) {
-            $stmt->bindParam(":branch_id", $branchId);
-        }
-        
-        $stmt->execute();
-        
-        if ($stmt->rowCount() === 0) {
-            return false;
-        }
-        
-        $product = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $product['quantity'] >= $quantity;
-    } catch (Exception $e) {
-        // في حالة حدوث خطأ، نفترض أن المنتج غير متوفر
-        return false;
-    }
-}
-
-/**
  * المساعدة في تنسيق الإستجابة
  * 
  * @param bool $status حالة العملية
@@ -409,56 +287,5 @@ function formatResponse($status, $message, $data = null) {
         "message" => $message,
         "data" => $data
     ];
-}
-
-/**
- * إنشاء رابط تأكيد يحتوي على توقيع رقمي
- * 
- * @param string $action نوع العملية
- * @param int $id المعرف
- * @param string $secret مفتاح سري
- * @param int $expiry مدة الصلاحية بالثواني
- * @return string الرابط المولد
- */
-function generateSignedUrl($action, $id, $secret = null, $expiry = 3600) {
-    if ($secret === null && defined('APP_SECRET_KEY')) {
-        $secret = APP_SECRET_KEY;
-    } elseif ($secret === null) {
-        $secret = 'salonmanagementsystem';
-    }
-    
-    $expires = time() + $expiry;
-    $data = $action . '|' . $id . '|' . $expires;
-    $signature = hash_hmac('sha256', $data, $secret);
-    
-    return $action . '?id=' . $id . '&expires=' . $expires . '&signature=' . $signature;
-}
-
-/**
- * التحقق من صحة التوقيع الرقمي للرابط
- * 
- * @param string $action نوع العملية
- * @param int $id المعرف
- * @param int $expires وقت انتهاء الصلاحية
- * @param string $signature التوقيع
- * @param string $secret المفتاح السري
- * @return bool نتيجة التحقق
- */
-function verifySignedUrl($action, $id, $expires, $signature, $secret = null) {
-    if ($secret === null && defined('APP_SECRET_KEY')) {
-        $secret = APP_SECRET_KEY;
-    } elseif ($secret === null) {
-        $secret = 'salonmanagementsystem';
-    }
-    
-    // التحقق من انتهاء صلاحية الرابط
-    if (time() > $expires) {
-        return false;
-    }
-    
-    $data = $action . '|' . $id . '|' . $expires;
-    $expectedSignature = hash_hmac('sha256', $data, $secret);
-    
-    return hash_equals($expectedSignature, $signature);
 }
 ?>

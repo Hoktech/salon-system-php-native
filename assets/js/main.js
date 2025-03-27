@@ -313,9 +313,3 @@ function showAlert(container, type, message, autoHide = true) {
  * متغير عام لتخزين معلومات المستخدم
  * سيتم تعبئته بالبيانات من خلال PHP
  */
-const userInfo = {
-    id: <?php echo $_SESSION['user_id'] ?? 0; ?>,
-    name: '<?php echo addslashes($_SESSION['full_name'] ?? ''); ?>',
-    role: '<?php echo addslashes($_SESSION['role'] ?? ''); ?>',
-    permissions: <?php echo json_encode($_SESSION['permissions'] ?? []); ?>
-};

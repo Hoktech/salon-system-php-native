@@ -10,47 +10,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
- * التحقق من تسجيل دخول المستخدم وصلاحياته
- * 
- * @param array $allowedRoles الأدوار المسموح لها بالوصول
- * @return array بيانات المستخدم
- * @throws Exception في حالة عدم وجود صلاحية
- */
-function checkUserPermission($allowedRoles = []) {
-    // التحقق من تسجيل دخول المستخدم
-    if (!isset($_SESSION['user_id'])) {
-        header('HTTP/1.1 401 Unauthorized');
-        echo json_encode([
-            'status' => false,
-            'message' => 'يجب تسجيل الدخول أولاً',
-            'data' => null
-        ]);
-        exit;
-    }
-    
-    // التحقق من الأدوار المسموح لها
-    if (!empty($allowedRoles) && !in_array($_SESSION['role'], $allowedRoles)) {
-        header('HTTP/1.1 403 Forbidden');
-        echo json_encode([
-            'status' => false,
-            'message' => 'ليس لديك صلاحية للوصول إلى هذه الصفحة',
-            'data' => null
-        ]);
-        exit;
-    }
-    
-    // إرجاع بيانات المستخدم
-    return [
-        'id' => $_SESSION['user_id'],
-        'username' => $_SESSION['username'],
-        'name' => $_SESSION['name'],
-        'role' => $_SESSION['role'],
-        'branch_id' => $_SESSION['branch_id'] ?? null,
-        'permissions' => $_SESSION['permissions'] ?? []
-    ];
-}
-
-/**
  * التحقق من صلاحية محددة للمستخدم
  * 
  * @param string|array $requiredPermissions الصلاحية أو الصلاحيات المطلوبة

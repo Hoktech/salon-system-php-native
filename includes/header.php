@@ -1,68 +1,77 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <button class="btn btn-outline-secondary" id="menu-toggle">
             <i class="fas fa-bars"></i>
         </button>
         
+        <a class="navbar-brand d-md-none mx-auto" href="index.php">نظام إدارة الصالونات</a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto">
+            <div class="d-none d-md-block mx-auto">
+                <h4 class="mb-0">نظام إدارة الصالونات</h4>
+            </div>
+            
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle"></i> <?php echo $_SESSION['full_name'] ?? $_SESSION['name'] ?? 'المستخدم'; ?>
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge rounded-pill bg-danger notification-badge">0</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="#" data-page="profile"><i class="fas fa-user me-1"></i> الملف الشخصي</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" id="logout-btn"><i class="fas fa-sign-out-alt me-1"></i> تسجيل الخروج</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end" id="notification-dropdown">
+                        <li><div class="dropdown-item text-center">لا توجد إشعارات</div></li>
                     </ul>
                 </li>
                 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge bg-danger notification-badge">0</span>
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="d-none d-md-inline-block me-1">
+                            <?php echo isset($_SESSION['full_name']) ? $_SESSION['full_name'] : (isset($_SESSION['name']) ? $_SESSION['name'] : 'المستخدم'); ?>
+                        </span>
                     </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="notification-dropdown">
-                        <li><div class="dropdown-item text-center">لا توجد إشعارات</div></li>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" onclick="loadPage('profile'); return false;"><i class="fas fa-user me-1"></i> الملف الشخصي</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="logout-btn"><i class="fas fa-sign-out-alt me-1"></i> تسجيل الخروج</a></li>
                     </ul>
                 </li>
             </ul>
-            
-            <div class="d-flex">
-                <h4 class="mb-0">نظام إدارة الصالونات</h4>
-            </div>
         </div>
     </div>
 </nav>
 
 <script>
     $(document).ready(function() {
-        // تبديل القائمة الجانبية
-        $("#menu-toggle").click(function(e) {
-            e.preventDefault();
-            $("#wrapper").toggleClass("toggled");
-        });
-        
         // زر تسجيل الخروج
         $("#logout-btn").click(function(e) {
             e.preventDefault();
             
-            $.ajax({
-                url: 'api/auth/logout.php',
-                type: 'POST',
-                success: function(response) {
-                    if(response.status) {
+            if (confirm('هل أنت متأكد من رغبتك في تسجيل الخروج؟')) {
+                $.ajax({
+                    url: 'api/auth/logout.php',
+                    type: 'POST',
+                    success: function(response) {
                         window.location.href = 'login.php';
+                    },
+                    error: function() {
+                        alert('حدث خطأ أثناء محاولة تسجيل الخروج');
                     }
-                }
-            });
+                });
+            }
         });
         
         // تحميل الإشعارات
-        loadNotifications();
-        
-        // تحميل الإشعارات كل دقيقة
-        setInterval(loadNotifications, 60000);
+        try {
+            loadNotifications();
+            // تحميل الإشعارات كل دقيقة
+            setInterval(loadNotifications, 60000);
+        } catch(e) {
+            console.log('خطأ في تحميل الإشعارات:', e);
+        }
     });
     
     // دالة لتحميل الإشعارات
@@ -74,6 +83,9 @@
                 if(response.status) {
                     updateNotifications(response.data);
                 }
+            },
+            error: function() {
+                // تجاهل الأخطاء في حالة عدم توفر API الإشعارات
             }
         });
     }

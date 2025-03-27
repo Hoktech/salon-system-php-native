@@ -214,7 +214,6 @@
         </div>
     </div>
 </div>
-
 <script>
     $(document).ready(function() {
         // تحميل العملاء
@@ -422,129 +421,236 @@
         }
     }
     
-    // دالة لعرض تفاصيل العميل
-    function viewCustomer(customerId) {
-        // طلب بيانات العميل من API
-        getCustomer(customerId)
-            .then(response => {
-                if(response.status) {
-                    const customer = response.data.customer;
-                    const visits = response.data.visits;
-                    const favoriteServices = response.data.favorite_services;
-                    
-                    // تنسيق البيانات
-                    const birthdate = customer.birthdate ? new Date(customer.birthdate).toLocaleDateString('ar-SA') : '-';
-                    const gender = customer.gender === 'male' ? 'ذكر' : 'أنثى';
-                    const createdAt = new Date(customer.created_at).toLocaleDateString('ar-SA');
-                    const lastVisit = visits.length > 0 ? new Date(visits[0].date).toLocaleDateString('ar-SA') : '-';
-                    
-                    // تحديث معلومات العميل
-                    $('#customer-details-name').text(customer.full_name);
-                    $('#customer-details-phone').text(customer.phone);
-                    $('#customer-details-email').text(customer.email || '-');
-                    $('#customer-details-birthdate').text(birthdate);
-                    $('#customer-details-gender').text(gender);
-                    $('#customer-details-address').text(customer.address || '-');
-                    $('#customer-details-loyalty').text(customer.loyalty_points);
-                    $('#customer-details-created').text(createdAt);
-                    $('#customer-details-notes').text(customer.notes || '-');
-                    
-                    // تحديث معلومات الزيارات
-                    $('#customer-details-visits').text(visits.length);
-                    $('#customer-details-last-visit').text(lastVisit);
-                    $('#customer-details-total-spent').text(response.data.total_spent.toFixed(2));
-                    $('#customer-details-avg-spent').text(response.data.avg_spent.toFixed(2));
-                    
-                    // تحديث الخدمات المفضلة
-                    if(favoriteServices.length > 0) {
-                        let servicesHtml = '';
-                        
-                        favoriteServices.forEach(service => {
-                            servicesHtml += `
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    ${service.name}
-                                    <span class="badge bg-primary rounded-pill">${service.count}</span>
-                                </li>
-                            `;
-                        });
-                        
-                        $('#customer-details-services').html(servicesHtml);
-                    } else {
-                        $('#customer-details-services').html('<li class="list-group-item">لا توجد خدمات</li>');
-                    }
-                    
-                    // تحديث جدول الزيارات
-                    if(visits.length > 0) {
-                        let visitsHtml = '';
-                        
-                        visits.forEach(visit => {
-                            const date = new Date(visit.date).toLocaleDateString('ar-SA');
-                            
-                            visitsHtml += `
-                                <tr>
-                                    <td>${date}</td>
-                                    <td>${visit.services}</td>
-                                    <td>${visit.amount.toFixed(2)}</td>
-                                    <td>${visit.employee}</td>
-                                    <td>${visit.notes || '-'}</td>
-                                </tr>
-                            `;
-                        });
-                        
-                        $('#customer-visits-table tbody').html(visitsHtml);
-                    } else {
-                        $('#customer-visits-table tbody').html('<tr><td colspan="5" class="text-center">لا توجد زيارات</td></tr>');
-                    }
-                    
-                    // تخزين معرف العميل في أزرار الإجراءات
-                    $('#add-appointment-btn').data('customer-id', customerId);
-                    $('#add-invoice-btn').data('customer-id', customerId);
-                    
-                    // عرض النافذة المنبثقة
-                    $('#customerDetailsModal').modal('show');
-                } else {
-                    alert('حدث خطأ أثناء تحميل بيانات العميل: ' + response.message);
-                }
-            })
-            .catch(error => {
-                alert('حدث خطأ أثناء تحميل بيانات العميل');
-                console.error(error);
-            });
-    }
+// Mejorar función para ver detalles del cliente para manejar errores
+function viewCustomer(customerId) {
+    // عرض مؤشر التحميل والنافذة المنبثقة
+    $('#customerDetailsModal').modal('show');
+    const modalBody = $('#customerDetailsModal .modal-body');
+    modalBody.html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>');
     
-    // دالة لتعديل العميل
-    function editCustomer(customerId) {
-        // طلب بيانات العميل من API
-        getCustomer(customerId)
-            .then(response => {
-                if(response.status) {
-                    const customer = response.data.customer;
+    // طلب بيانات العميل من API
+    fetch(`api/customers/read_one.php?id=${customerId}`)
+        .then(response => response.json())
+        .then(response => {
+            console.log("API Response:", response); // للتشخيص
+            
+            if(response.status) {
+                const customer = response.data.customer;
+                const visits = response.data.visits || [];
+                const favoriteServices = response.data.favorite_services || [];
+                const totalSpent = response.data.total_spent || 0;
+                const avgSpent = response.data.avg_spent || 0;
+                
+                // إعادة بناء محتوى النافذة المنبثقة
+                modalBody.html(`
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="m-0 font-weight-bold">معلومات العميل</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>الاسم:</strong> <span id="customer-details-name">${customer.full_name}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>الهاتف:</strong> <span id="customer-details-phone">${customer.phone}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>البريد الإلكتروني:</strong> <span id="customer-details-email">${customer.email || '-'}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>تاريخ الميلاد:</strong> <span id="customer-details-birthdate">${customer.birthdate ? new Date(customer.birthdate).toLocaleDateString('ar-SA') : '-'}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>النوع:</strong> <span id="customer-details-gender">${customer.gender === 'male' ? 'ذكر' : 'أنثى'}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>العنوان:</strong> <span id="customer-details-address">${customer.address || '-'}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>نقاط الولاء:</strong> <span id="customer-details-loyalty">${customer.loyalty_points}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>تاريخ التسجيل:</strong> <span id="customer-details-created">${new Date(customer.created_at).toLocaleDateString('ar-SA')}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>ملاحظات:</strong> <p id="customer-details-notes">${customer.notes || '-'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="m-0 font-weight-bold">معلومات الزيارات</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>عدد الزيارات:</strong> <span id="customer-details-visits">${visits.length}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>آخر زيارة:</strong> <span id="customer-details-last-visit">${visits.length > 0 ? new Date(visits[0].date).toLocaleDateString('ar-SA') : '-'}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>إجمالي المدفوعات:</strong> <span id="customer-details-total-spent">${totalSpent.toFixed(2)}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>متوسط الإنفاق:</strong> <span id="customer-details-avg-spent">${avgSpent.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0 font-weight-bold">الخدمات المفضلة</h6>
+                                </div>
+                                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                                    <ul class="list-group list-group-flush" id="customer-details-services">
+                                        ${favoriteServices.length > 0 ? 
+                                            favoriteServices.map(service => `
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    ${service.name}
+                                                    <span class="badge bg-primary rounded-pill">${service.count}</span>
+                                                </li>
+                                            `).join('') : 
+                                            '<li class="list-group-item">لا توجد خدمات</li>'
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
-                    // تعبئة النموذج ببيانات العميل
-                    $('#customer-id').val(customer.id);
-                    $('#full-name').val(customer.full_name);
-                    $('#phone').val(customer.phone);
-                    $('#email').val(customer.email);
-                    $('#birthdate').val(customer.birthdate);
-                    $('#gender').val(customer.gender);
-                    $('#address').val(customer.address);
-                    $('#notes').val(customer.notes);
-                    
-                    // تغيير عنوان النافذة المنبثقة
-                    $('#customerModalLabel').text('تعديل العميل');
-                    
-                    // عرض النافذة المنبثقة
-                    $('#customerModal').modal('show');
-                } else {
-                    alert('حدث خطأ أثناء تحميل بيانات العميل: ' + response.message);
-                }
-            })
-            .catch(error => {
-                alert('حدث خطأ أثناء تحميل بيانات العميل');
-                console.error(error);
-            });
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold">آخر الزيارات</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm" id="customer-visits-table" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>الخدمات</th>
+                                            <th>المبلغ</th>
+                                            <th>الموظف</th>
+                                            <th>ملاحظات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${visits.length > 0 ? 
+                                            visits.map(visit => `
+                                                <tr>
+                                                    <td>${new Date(visit.date).toLocaleDateString('ar-SA')}</td>
+                                                    <td>${visit.services || '-'}</td>
+                                                    <td>${visit.amount ? visit.amount.toFixed(2) : '0.00'}</td>
+                                                    <td>${visit.employee || '-'}</td>
+                                                    <td>${visit.notes || '-'}</td>
+                                                </tr>
+                                            `).join('') : 
+                                            '<tr><td colspan="5" class="text-center">لا توجد زيارات</td></tr>'
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                // تخزين معرف العميل في أزرار الإجراءات
+                $('#add-appointment-btn').data('customer-id', customerId);
+                $('#add-invoice-btn').data('customer-id', customerId);
+                
+            } else {
+                alert('حدث خطأ أثناء تحميل بيانات العميل: ' + response.message);
+                $('#customerDetailsModal').modal('hide');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching customer details:', error);
+            modalBody.html(`
+                <div class="alert alert-danger">
+                    حدث خطأ أثناء تحميل بيانات العميل. الرجاء المحاولة مرة أخرى.
+                </div>
+            `);
+        });
+}
+// Mejorar función de edición de cliente
+function editCustomer(customerId) {
+    // Mostrar indicador de carga
+    $('#customerModal .modal-body').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جاري التحميل...</span></div></div>');
+    $('#customerModal').modal('show');
+
+    // Solicitar datos del cliente a la API
+    getCustomer(customerId)
+        .then(response => {
+            if(response.status) {
+                const customer = response.data;
+                
+                // Reconstruir el contenido del modal
+                $('#customerModal .modal-body').html(`
+                    <form id="customer-form">
+                        <input type="hidden" id="customer-id">
+                        <div class="mb-3">
+                            <label for="full-name" class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="full-name" name="full_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">رقم الهاتف <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="email" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="birthdate" class="form-label">تاريخ الميلاد</label>
+                            <input type="date" class="form-control" id="birthdate" name="birthdate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">النوع <span class="text-danger">*</span></label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">العنوان</label>
+                            <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">ملاحظات</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        </div>
+                    </form>
+                `);
+                
+                // Llenar el formulario con datos del cliente
+                $('#customer-id').val(customer.id);
+                $('#full-name').val(customer.full_name);
+                $('#phone').val(customer.phone);
+                $('#email').val(customer.email);
+                $('#birthdate').val(customer.birthdate);
+                $('#gender').val(customer.gender);
+                $('#address').val(customer.address);
+                $('#notes').val(customer.notes);
+                
+                // Cambiar título del modal
+                $('#customerModalLabel').text('تعديل العميل');
+                
+                // El modal ya está abierto
+            } else {
+                $('#customerModal').modal('hide');
+                alert('حدث خطأ أثناء تحميل بيانات العميل: ' + response.message);
+            }
+        })
+        .catch(error => {
+            $('#customerModal').modal('hide');
+            alert('حدث خطأ أثناء تحميل بيانات العميل');
+            console.error(error);
+        });
     }
-    
+
     // دالة لحذف العميل
     function deleteCustomer(customerId) {
         // التأكيد قبل الحذف

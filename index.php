@@ -16,10 +16,12 @@ if(!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="assets/css/bootstrap.rtl.min.css">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Google Fonts (Tajawal) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/custom.css">
+    <link rel="stylesheet" href="assets/css/custom.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <!-- هيكل الصفحة -->
@@ -38,6 +40,9 @@ if(!isset($_SESSION['user_id'])) {
                     <!-- سيتم تحميل المحتوى هنا من خلال AJAX -->
                 </div>
             </div>
+            
+            <!-- تذييل الصفحة -->
+            <?php include 'includes/footer.php'; ?>
         </div>
     </div>
     
@@ -48,8 +53,9 @@ if(!isset($_SESSION['user_id'])) {
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom JS -->
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/api.js?v=<?php echo time(); ?>"></script>
+    <script src="assets/js/sidebar-toggle.js?v=<?php echo time(); ?>"></script>
+    <script src="assets/js/main.js?v=<?php echo time(); ?>"></script>
     
     <script>
         $(document).ready(function() {
@@ -62,12 +68,6 @@ if(!isset($_SESSION['user_id'])) {
                 const page = $(this).data('page');
                 loadPage(page);
             });
-            
-            // زر تبديل القائمة الجانبية
-            $("#menu-toggle").click(function(e) {
-                e.preventDefault();
-                $("#wrapper").toggleClass("toggled");
-            });
         });
         
         // دالة لتحميل الصفحات
@@ -75,6 +75,15 @@ if(!isset($_SESSION['user_id'])) {
             $.ajax({
                 url: 'pages/' + page + '.php',
                 type: 'GET',
+                beforeSend: function() {
+                    $('#main-content').html(`
+                        <div class="d-flex justify-content-center align-items-center" style="height: 400px;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">جاري التحميل...</span>
+                            </div>
+                        </div>
+                    `);
+                },
                 success: function(data) {
                     $('#main-content').html(data);
                     
@@ -102,7 +111,5 @@ if(!isset($_SESSION['user_id'])) {
             document.title = title + ' - نظام إدارة صالونات الحلاقة والكوافير';
         }
     </script>
-    
-    <?php include 'includes/footer.php'; ?>
 </body>
 </html>
