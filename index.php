@@ -14,10 +14,12 @@ if(!isset($_SESSION['user_id'])) {
     <title>نظام إدارة صالونات الحلاقة والكوافير</title>
     <!-- Bootstrap RTL CSS -->
     <link rel="stylesheet" href="assets/css/bootstrap.rtl.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/custom.css">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Chart.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/custom.css">
 </head>
 <body>
     <!-- هيكل الصفحة -->
@@ -43,6 +45,8 @@ if(!isset($_SESSION['user_id'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom JS -->
     <script src="assets/js/api.js"></script>
     <script src="assets/js/main.js"></script>
@@ -57,6 +61,12 @@ if(!isset($_SESSION['user_id'])) {
                 e.preventDefault();
                 const page = $(this).data('page');
                 loadPage(page);
+            });
+            
+            // زر تبديل القائمة الجانبية
+            $("#menu-toggle").click(function(e) {
+                e.preventDefault();
+                $("#wrapper").toggleClass("toggled");
             });
         });
         
@@ -73,8 +83,13 @@ if(!isset($_SESSION['user_id'])) {
                     $('.nav-link[data-page="' + page + '"]').addClass('active');
                     
                     // تحديث عنوان الصفحة
-                    const pageTitle = $('.nav-link[data-page="' + page + '"]').text();
+                    const pageTitle = $('.nav-link[data-page="' + page + '"]').text().trim();
                     updatePageTitle(pageTitle);
+                    
+                    // إغلاق القائمة الجانبية في الأجهزة الصغيرة بعد اختيار صفحة
+                    if ($(window).width() < 768) {
+                        $("#wrapper").addClass("toggled");
+                    }
                 },
                 error: function() {
                     $('#main-content').html('<div class="alert alert-danger">حدث خطأ أثناء تحميل الصفحة</div>');
@@ -87,4 +102,7 @@ if(!isset($_SESSION['user_id'])) {
             document.title = title + ' - نظام إدارة صالونات الحلاقة والكوافير';
         }
     </script>
-            <?php include 'includes/footer.php'; ?>
+    
+    <?php include 'includes/footer.php'; ?>
+</body>
+</html>
